@@ -1,3 +1,3 @@
-## Your module
+## Noise Productions Virtual Video Director
 
-Write some help for your users here!
+Control Virtual Video Director (VVD) by Noise Productions.

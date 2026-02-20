@@ -3,30 +3,108 @@ import type { ModuleInstance } from './main.js'
 
 export function UpdateFeedbacks(self: ModuleInstance): void {
 	self.setFeedbackDefinitions({
-		ChannelState: {
-			name: 'Example Feedback',
+		power_state: {
+			name: 'Power State',
 			type: 'boolean',
 			defaultStyle: {
-				bgcolor: combineRgb(255, 0, 0),
+				bgcolor: combineRgb(0, 200, 0),
 				color: combineRgb(0, 0, 0),
 			},
 			options: [
 				{
-					id: 'num',
-					type: 'number',
-					label: 'Test',
-					default: 5,
-					min: 0,
-					max: 10,
+					id: 'state',
+					type: 'dropdown',
+					label: 'Expected State',
+					default: 'on',
+					choices: [
+						{ id: 'on', label: 'On' },
+						{ id: 'off', label: 'Off' },
+					],
 				},
 			],
 			callback: (feedback) => {
-				console.log('Hello world!', feedback.options.num)
-				if (Number(feedback.options.num) > 5) {
-					return true
-				} else {
-					return false
-				}
+				const isPowered = self.systemStatus?.power ?? false
+				return feedback.options.state === 'on' ? isPowered : !isPowered
+			},
+		},
+
+		channel_muted: {
+			name: 'Channel Muted',
+			type: 'boolean',
+			defaultStyle: {
+				bgcolor: combineRgb(255, 0, 0),
+				color: combineRgb(255, 255, 255),
+			},
+			options: [
+				{
+					id: 'channel',
+					type: 'number',
+					label: 'Channel',
+					default: 1,
+					min: 1,
+					max: 64,
+				},
+			],
+			callback: (feedback) => {
+				const channelId = Number(feedback.options.channel)
+				return self.channelMuteStates.get(channelId) ?? false
+			},
+		},
+
+		channel_mode: {
+			name: 'Channel Mode',
+			type: 'boolean',
+			defaultStyle: {
+				bgcolor: combineRgb(0, 100, 220),
+				color: combineRgb(255, 255, 255),
+			},
+			options: [
+				{
+					id: 'channel',
+					type: 'number',
+					label: 'Channel',
+					default: 1,
+					min: 1,
+					max: 64,
+				},
+				{
+					id: 'mode',
+					type: 'dropdown',
+					label: 'Expected Mode',
+					default: 'ai_vad',
+					choices: [
+						{ id: 'ai_vad', label: 'AI VAD' },
+						{ id: 'gate', label: 'Gate' },
+					],
+				},
+			],
+			callback: (feedback) => {
+				const channelId = Number(feedback.options.channel)
+				const useAiVad = self.channelStates.get(channelId)?.useAiVad ?? false
+				return feedback.options.mode === 'ai_vad' ? useAiVad : !useAiVad
+			},
+		},
+
+		channel_hpf: {
+			name: 'Channel High Pass Filter',
+			type: 'boolean',
+			defaultStyle: {
+				bgcolor: combineRgb(180, 0, 220),
+				color: combineRgb(255, 255, 255),
+			},
+			options: [
+				{
+					id: 'channel',
+					type: 'number',
+					label: 'Channel',
+					default: 1,
+					min: 1,
+					max: 64,
+				},
+			],
+			callback: (feedback) => {
+				const channelId = Number(feedback.options.channel)
+				return self.channelStates.get(channelId)?.highPassFilterEnabled ?? false
 			},
 		},
 	})

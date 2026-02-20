@@ -1,16 +1,16 @@
 {
-	"id": "your-module-name",
-	"name": "your-module-name",
-	"shortname": "module-shortname",
-	"description": "A short one line description of your module",
-	"version": "0.0.0",
+	"id": "noiseproductions-vvd",
+	"name": "Virtual Video Director",
+	"shortname": "VVD",
+	"description": "Control Virtual Video Director (VVD) by Noise Productions.",
+	"version": "0.1.0",
 	"license": "MIT",
-	"repository": "git+https://github.com/bitfocus/companion-module-your-module-name.git",
-	"bugs": "https://github.com/bitfocus/companion-module-your-module-name/issues",
+	"repository": "git+https://github.com/bitfocus/companion-module-noiseproductions-vvd.git",
+	"bugs": "https://github.com/bitfocus/companion-module-noiseproductions-vvd/issues",
 	"maintainers": [
 		{
-			"name": "Your name",
-			"email": "Your email"
+			"name": "Bryce Seifert",
+			"email": "bryce@bitfocus.io"
 		}
 	],
 	"runtime": {
@@ -20,7 +20,7 @@
 		"entrypoint": "../dist/main.js"
 	},
 	"legacyIds": [],
-	"manufacturer": "Your company",
-	"products": ["Your product"],
-	"keywords": []
+	"manufacturer": "Noise Productions",
+	"products": ["Virtual Video Director"],
+	"keywords": ["vvd", "video", "director", "broadcast", "noise productions"]
 }
