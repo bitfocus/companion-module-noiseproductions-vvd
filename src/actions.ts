@@ -1,9 +1,5 @@
 import type { ModuleInstance } from './main.js'
 
-// Broadcast channel scene names as used in VVD shows
-export const BROADCAST_CHANNELS = ['Ad Break', 'Music Break', 'On Air', 'Off Air'] as const
-export type BroadcastChannel = (typeof BROADCAST_CHANNELS)[number]
-
 export function UpdateActions(self: ModuleInstance): void {
 	self.setActionDefinitions({
 		power_on: {
@@ -61,15 +57,13 @@ export function UpdateActions(self: ModuleInstance): void {
 					label: 'Channel',
 					default: 1,
 					min: 1,
-					max: 64,
+					max: 135,
 				},
 			],
 			callback: async (event) => {
 				const channelId = Number(event.options.channel)
-				console.log(`Mute Channel ${channelId}`)
 				try {
 					await self.api.muteChannel(channelId)
-					console.log(`Mute Channel ${channelId} successful`)
 					self.updateMuteState(channelId, true)
 				} catch (err) {
 					self.log('error', `Mute Channel ${channelId} failed: ${err}`)
@@ -86,7 +80,7 @@ export function UpdateActions(self: ModuleInstance): void {
 					label: 'Channel',
 					default: 1,
 					min: 1,
-					max: 64,
+					max: 135,
 				},
 			],
 			callback: async (event) => {
@@ -109,7 +103,7 @@ export function UpdateActions(self: ModuleInstance): void {
 					label: 'Channel',
 					default: 1,
 					min: 1,
-					max: 64,
+					max: 135,
 				},
 			],
 			callback: async (event) => {
@@ -133,7 +127,7 @@ export function UpdateActions(self: ModuleInstance): void {
 					label: 'Channel',
 					default: 1,
 					min: 1,
-					max: 64,
+					max: 135,
 				},
 				{
 					id: 'slot',
@@ -141,7 +135,7 @@ export function UpdateActions(self: ModuleInstance): void {
 					label: 'Trigger Slot',
 					default: 1,
 					min: 1,
-					max: 32,
+					max: 8,
 				},
 			],
 			callback: async (event) => {
@@ -155,23 +149,47 @@ export function UpdateActions(self: ModuleInstance): void {
 			},
 		},
 
-		broadcast_channel: {
-			name: 'Activate Broadcast Channel',
+		load_scene_by_slot: {
+			name: 'Load Scene by Slot',
 			options: [
 				{
-					id: 'channel',
-					type: 'dropdown',
-					label: 'Broadcast Channel',
-					default: 'On Air',
-					choices: BROADCAST_CHANNELS.map((c) => ({ id: c, label: c })),
+					id: 'slot',
+					type: 'number',
+					label: 'Scene Slot',
+					default: 1,
+					min: 1,
+					max: 99,
 				},
 			],
 			callback: async (event) => {
-				const sceneName = String(event.options.channel)
+				const slot = Number(event.options.slot)
+				try {
+					await self.api.loadSceneBySlot(slot)
+					self.activeSceneSlot = slot
+					self.checkFeedbacks('active_scene')
+				} catch (err) {
+					self.log('error', `Load Scene Slot ${slot} failed: ${err}`)
+				}
+			},
+		},
+
+		load_scene_by_name: {
+			name: 'Load Scene by Name',
+			options: [
+				{
+					id: 'name',
+					type: 'textinput',
+					label: 'Scene Name',
+					default: '',
+				},
+			],
+			callback: async (event) => {
+				const sceneName = String(event.options.name).trim()
+				if (!sceneName) return
 				try {
 					await self.api.loadSceneByName(sceneName)
 				} catch (err) {
-					self.log('error', `Activate Broadcast Channel "${sceneName}" failed: ${err}`)
+					self.log('error', `Load Scene "${sceneName}" failed: ${err}`)
 				}
 			},
 		},

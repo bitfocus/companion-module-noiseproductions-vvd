@@ -5,6 +5,19 @@ export interface VVDSystemStatus {
 	silenceThreshold: number
 }
 
+export interface VVDActiveScene {
+	activeSlot: number | null
+	hasActiveScene: boolean
+}
+
+export interface VVDSceneSlot {
+	slotNumber: number
+	name: string
+	hasScene: boolean
+	sceneName: string | null
+	sceneId: string | null
+}
+
 export interface VVDTriggerSlot {
 	slotNumber: number
 	triggerInstanceId: string | null
@@ -114,5 +127,14 @@ export class VVDApi {
 	async loadSceneByName(sceneName: string): Promise<void> {
 		const encoded = encodeURIComponent(sceneName)
 		await this.request('POST', `/api/v2/show/scenes/load?name=${encoded}`)
+	}
+
+	async getActiveScene(): Promise<VVDActiveScene> {
+		return this.request<VVDActiveScene>('GET', '/api/v2/show/active')
+	}
+
+	async getScenes(): Promise<VVDSceneSlot[]> {
+		const response = await this.request<{ activeSlot: number; scenes: VVDSceneSlot[] }>('GET', '/api/v2/show/scenes')
+		return response.scenes ?? []
 	}
 }

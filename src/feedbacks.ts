@@ -107,5 +107,27 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 				return self.channelStates.get(channelId)?.highPassFilterEnabled ?? false
 			},
 		},
+
+		active_scene: {
+			name: 'Active Scene Slot',
+			type: 'boolean',
+			defaultStyle: {
+				bgcolor: combineRgb(0, 180, 220),
+				color: combineRgb(255, 255, 255),
+			},
+			options: [
+				{
+					id: 'slot',
+					type: 'number',
+					label: 'Scene Slot',
+					default: 1,
+					min: 1,
+					max: 99,
+				},
+			],
+			callback: (feedback) => {
+				return self.activeSceneSlot === Number(feedback.options.slot)
+			},
+		},
 	})
 }

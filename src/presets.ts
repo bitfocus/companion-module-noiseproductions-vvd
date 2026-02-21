@@ -1,6 +1,5 @@
 import type { ModuleInstance } from './main.js'
 import { CompanionPresetDefinitions, combineRgb } from '@companion-module/base'
-import { BROADCAST_CHANNELS } from './actions.js'
 
 const WHITE = combineRgb(255, 255, 255)
 const BLACK = combineRgb(0, 0, 0)
@@ -9,18 +8,26 @@ const RED = combineRgb(200, 0, 0)
 const ORANGE = combineRgb(220, 120, 0)
 const BLUE = combineRgb(0, 100, 220)
 const PURPLE = combineRgb(130, 0, 200)
+const CYAN = combineRgb(0, 180, 220)
+const DARK_GREY = combineRgb(50, 50, 50)
 
-const BROADCAST_COLORS: Record<string, number> = {
-	'On Air': RED,
-	'Off Air': combineRgb(80, 80, 80),
-	'Ad Break': ORANGE,
-	'Music Break': BLUE,
+/** Channel IDs with channelNumber < 129 (standard mic channels) */
+function getStandardChannelIds(self: ModuleInstance): number[] {
+	return [...self.channelStates.keys()].filter((id) => id < 129).sort((a, b) => a - b)
+}
+
+/** Channel IDs with channelNumber >= 129 (special system channels) */
+function getSpecialChannelIds(self: ModuleInstance): number[] {
+	return [...self.channelStates.keys()].filter((id) => id >= 129).sort((a, b) => a - b)
 }
 
 export function UpdatePresets(self: ModuleInstance): void {
 	const presets: CompanionPresetDefinitions = {}
+	const CHANNEL_IDS = getStandardChannelIds(self)
+	const SPECIAL_CHANNEL_IDS = getSpecialChannelIds(self)
 
-	// Power controls
+	// ── Power controls ────────────────────────────────────────────────────────
+
 	presets['power_on'] = {
 		type: 'button',
 		category: 'Power',
@@ -84,84 +91,163 @@ export function UpdatePresets(self: ModuleInstance): void {
 		],
 	}
 
-	// Broadcast channels
-	for (const channel of BROADCAST_CHANNELS) {
-		const key = channel.toLowerCase().replace(/\s+/g, '_')
-		presets[`broadcast_${key}`] = {
+	// ── Per-channel presets (channels 1–8) ────────────────────────────────────
+	// Sections are grouped by action type, with a text header followed by all 8 channels.
+
+	const category = 'Channels'
+
+	// ── Channel Info ──
+	presets['header_info'] = { type: 'text', category, name: 'Channel Info', text: '' }
+
+	for (const ch of CHANNEL_IDS) {
+		const name = `$(vvd:ch${ch}_name)`
+		presets[`info_ch${ch}`] = {
 			type: 'button',
-			category: 'Broadcast Channels',
-			name: channel,
+			category,
+			name: `Channel ${ch} Info`,
 			style: {
-				text: channel.toUpperCase(),
+				text: `${name}\n$(vvd:ch${ch}_gain)\n$(vvd:ch${ch}_muted)`,
 				size: 'auto',
 				color: WHITE,
-				bgcolor: BROADCAST_COLORS[channel] ?? PURPLE,
+				bgcolor: DARK_GREY,
 				show_topbar: false,
 			},
-			steps: [
-				{
-					down: [{ actionId: 'broadcast_channel', options: { channel } }],
-					up: [],
-				},
-			],
-			feedbacks: [],
+			steps: [{ down: [], up: [] }],
+			feedbacks: [{ feedbackId: 'channel_muted', options: { channel: ch }, style: { bgcolor: RED, color: WHITE } }],
 		}
 	}
 
-	// Channel mute presets for channels 1–8
-	for (let ch = 1; ch <= 8; ch++) {
+	// ── Mute Controls ──
+	presets['header_mute'] = { type: 'text', category, name: 'Mute Controls', text: '' }
+
+	for (const ch of CHANNEL_IDS) {
+		const name = `$(vvd:ch${ch}_name)`
 		presets[`mute_ch${ch}`] = {
 			type: 'button',
-			category: 'Channel Mute',
+			category,
 			name: `Mute Channel ${ch}`,
+			style: { text: `${name}\nMUTE`, size: 'auto', color: WHITE, bgcolor: DARK_GREY, show_topbar: false },
+			steps: [{ down: [{ actionId: 'toggle_mute_channel', options: { channel: ch } }], up: [] }],
+			feedbacks: [{ feedbackId: 'channel_muted', options: { channel: ch }, style: { bgcolor: RED, color: WHITE } }],
+		}
+	}
+
+	presets['header_mute_special'] = { type: 'text', category, name: 'Mute Controls - Special Channels', text: '' }
+
+	for (const ch of SPECIAL_CHANNEL_IDS) {
+		const name = `$(vvd:ch${ch}_name)`
+		presets[`mute_ch${ch}`] = {
+			type: 'button',
+			category,
+			name: `Mute Channel ${ch}`,
+			style: { text: `${name}\nMUTE`, size: 'auto', color: WHITE, bgcolor: DARK_GREY, show_topbar: false },
+			steps: [{ down: [{ actionId: 'toggle_mute_channel', options: { channel: ch } }], up: [] }],
+			feedbacks: [{ feedbackId: 'channel_muted', options: { channel: ch }, style: { bgcolor: RED, color: WHITE } }],
+		}
+	}
+
+	// ── Channel Mode ──
+	presets['header_mode'] = { type: 'text', category, name: 'Channel Mode', text: '' }
+
+	for (const ch of CHANNEL_IDS) {
+		const name = `$(vvd:ch${ch}_name)`
+		presets[`mode_ch${ch}`] = {
+			type: 'button',
+			category,
+			name: `Channel ${ch} Mode`,
 			style: {
-				text: `CH ${ch}\nMUTE`,
+				text: `${name}\n$(vvd:ch${ch}_mode)`,
 				size: 'auto',
 				color: WHITE,
-				bgcolor: BLACK,
+				bgcolor: DARK_GREY,
 				show_topbar: false,
 			},
-			steps: [
-				{
-					down: [{ actionId: 'toggle_mute_channel', options: { channel: ch } }],
-					up: [],
-				},
-			],
+			steps: [{ down: [], up: [] }],
 			feedbacks: [
 				{
-					feedbackId: 'channel_muted',
-					options: { channel: ch },
-					style: { bgcolor: RED, color: WHITE },
+					feedbackId: 'channel_mode',
+					options: { channel: ch, mode: 'ai_vad' },
+					style: { bgcolor: BLUE, color: WHITE },
 				},
 			],
 		}
 	}
 
-	// Trigger presets for channel 1, slots 1–4 as a starting example
-	for (let slot = 1; slot <= 4; slot++) {
-		presets[`trigger_ch1_slot${slot}`] = {
+	// ── High Pass Filter ──
+	presets['header_hpf'] = { type: 'text', category, name: 'High Pass Filter', text: '' }
+
+	for (const ch of CHANNEL_IDS) {
+		const name = `$(vvd:ch${ch}_name)`
+		presets[`hpf_ch${ch}`] = {
 			type: 'button',
-			category: 'Triggers',
-			name: `CH 1 Trigger ${slot}`,
+			category,
+			name: `Channel ${ch} High Pass Filter`,
 			style: {
-				text: `CH 1\nTRIG ${slot}`,
+				text: `${name}\nHPF: $(vvd:ch${ch}_hpf)`,
 				size: 'auto',
 				color: WHITE,
-				bgcolor: ORANGE,
+				bgcolor: DARK_GREY,
 				show_topbar: false,
 			},
-			steps: [
-				{
-					down: [
-						{
-							actionId: 'trigger_channel',
-							options: { channel: 1, slot },
-						},
-					],
-					up: [],
+			steps: [{ down: [], up: [] }],
+			feedbacks: [{ feedbackId: 'channel_hpf', options: { channel: ch }, style: { bgcolor: PURPLE, color: WHITE } }],
+		}
+	}
+
+	// ── Triggers ──
+	presets['header_triggers'] = { type: 'text', category, name: 'Triggers', text: '' }
+
+	for (const ch of CHANNEL_IDS) {
+		const name = `$(vvd:ch${ch}_name)`
+		for (let slot = 1; slot <= 4; slot++) {
+			presets[`trigger_ch${ch}_slot${slot}`] = {
+				type: 'button',
+				category,
+				name: `Channel ${ch} Trigger ${slot}`,
+				style: { text: `${name}\nTRIG ${slot}`, size: 'auto', color: WHITE, bgcolor: ORANGE, show_topbar: false },
+				steps: [{ down: [{ actionId: 'trigger_channel', options: { channel: ch, slot } }], up: [] }],
+				feedbacks: [],
+			}
+		}
+	}
+
+	presets['header_triggers_special'] = { type: 'text', category, name: 'Special Channels - Triggers', text: '' }
+
+	for (const ch of SPECIAL_CHANNEL_IDS) {
+		const name = `$(vvd:ch${ch}_name)`
+		for (let slot = 1; slot <= 4; slot++) {
+			presets[`trigger_ch${ch}_slot${slot}`] = {
+				type: 'button',
+				category,
+				name: `Channel ${ch} Trigger ${slot}`,
+				style: { text: `${name}\nTRIG ${slot}`, size: 'auto', color: WHITE, bgcolor: ORANGE, show_topbar: false },
+				steps: [{ down: [{ actionId: 'trigger_channel', options: { channel: ch, slot } }], up: [] }],
+				feedbacks: [],
+			}
+		}
+	}
+
+	const occupiedScenes = self.sceneSlots.filter((s) => s.hasScene)
+
+	if (occupiedScenes.length > 0) {
+		for (const scene of occupiedScenes) {
+			const label = scene.sceneName ?? scene.name
+			presets[`scene_slot${scene.slotNumber}`] = {
+				type: 'button',
+				category: 'Scenes',
+				name: `Scene: ${label}`,
+				style: {
+					text: `$(vvd:scene${scene.slotNumber}_name)`,
+					size: 'auto',
+					color: WHITE,
+					bgcolor: DARK_GREY,
+					show_topbar: false,
 				},
-			],
-			feedbacks: [],
+				steps: [{ down: [{ actionId: 'load_scene_by_slot', options: { slot: scene.slotNumber } }], up: [] }],
+				feedbacks: [
+					{ feedbackId: 'active_scene', options: { slot: scene.slotNumber }, style: { bgcolor: CYAN, color: WHITE } },
+				],
+			}
 		}
 	}
 

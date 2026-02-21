@@ -5,7 +5,7 @@ import { UpgradeScripts } from './upgrades.js'
 import { UpdateActions } from './actions.js'
 import { UpdateFeedbacks } from './feedbacks.js'
 import { UpdatePresets } from './presets.js'
-import { VVDApi, type VVDChannel, type VVDSystemStatus } from './api.js'
+import { VVDApi, type VVDChannel, type VVDSystemStatus, type VVDSceneSlot } from './api.js'
 
 export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	config!: ModuleConfig
@@ -14,6 +14,8 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	// Cached state, updated by polling
 	systemStatus: VVDSystemStatus | null = null
 	channelStates: Map<number, VVDChannel> = new Map()
+	activeSceneSlot: number | null = null
+	sceneSlots: VVDSceneSlot[] = []
 
 	get channelMuteStates(): Map<number, boolean> {
 		const mutes = new Map<number, boolean>()
@@ -58,11 +60,19 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 
 	private async connect(): Promise<void> {
 		try {
-			const [status, channels] = await Promise.all([this.api.getSystemStatus(), this.api.getAllChannels()])
+			const [status, channels, activeScene, scenes] = await Promise.all([
+				this.api.getSystemStatus(),
+				this.api.getAllChannels(),
+				this.api.getActiveScene().catch(() => null),
+				this.api.getScenes().catch(() => []),
+			])
 			this.systemStatus = status
 			this.applyChannelStates(channels)
+			this.activeSceneSlot = activeScene?.hasActiveScene ? (activeScene.activeSlot ?? null) : null
+			this.sceneSlots = scenes
 			this.updateStatus(InstanceStatus.Ok)
 			this.updateVariableDefinitions()
+			this.updatePresets()
 			this.syncVariables()
 			this.checkFeedbacks()
 			this.startPolling()
@@ -89,11 +99,29 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 
 	private async poll(): Promise<void> {
 		try {
-			const [status, channels] = await Promise.all([this.api.getSystemStatus(), this.api.getAllChannels()])
-			console.log(`Status: ${JSON.stringify(status)}`)
-			console.log(`Channels: ${JSON.stringify(channels)}`)
+			const [status, channels, activeScene, scenes] = await Promise.all([
+				this.api.getSystemStatus().catch(() => null),
+				this.api.getAllChannels().catch(() => null),
+				this.api.getActiveScene().catch(() => null),
+				this.api.getScenes().catch(() => null),
+			])
+			if (status === null || channels === null) {
+				this.updateStatus(InstanceStatus.ConnectionFailure, 'Cannot reach VVD')
+				return
+			}
+			const prevEnabledChannelCount = [...this.channelStates.values()].filter((ch) => ch.isEnabled).length
+			const prevOccupiedSceneCount = this.sceneSlots.filter((s) => s.hasScene).length
 			this.systemStatus = status
 			this.applyChannelStates(channels)
+			this.activeSceneSlot = activeScene?.hasActiveScene ? (activeScene.activeSlot ?? null) : null
+			if (scenes !== null) this.sceneSlots = scenes
+			const newEnabledChannelCount = [...this.channelStates.values()].filter((ch) => ch.isEnabled).length
+			const newOccupiedSceneCount = this.sceneSlots.filter((s) => s.hasScene).length
+			// Regenerate presets if enabled channel count or occupied scene count changed
+			if (newEnabledChannelCount !== prevEnabledChannelCount || newOccupiedSceneCount !== prevOccupiedSceneCount) {
+				this.updateVariableDefinitions()
+				this.updatePresets()
+			}
 			this.updateStatus(InstanceStatus.Ok)
 			this.syncVariables()
 			this.checkFeedbacks()
@@ -132,13 +160,17 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		}
 
 		for (const [id, ch] of this.channelStates) {
-			values[`ch${id}_name`] = ch.name
+			values[`ch${id}_name`] = ch.name.trim() || `CH ${id}`
 			values[`ch${id}_muted`] = ch.isMuted ? 'Muted' : 'Active'
 			values[`ch${id}_enabled`] = ch.isEnabled ? 'Enabled' : 'Disabled'
 			values[`ch${id}_gain`] = this.linearToDb(ch.gain)
 			values[`ch${id}_gate_threshold`] = this.gateThresholdToDb(ch.gateThreshold)
-			values[`ch${id}_mode`] = ch.useAiVad ? 'AI VAD' : 'Gate'
+			values[`ch${id}_mode`] = ch.useAiVad ? 'AI VAD' : 'Level'
 			values[`ch${id}_hpf`] = ch.highPassFilterEnabled ? 'On' : 'Off'
+		}
+
+		for (const scene of this.sceneSlots) {
+			values[`scene${scene.slotNumber}_name`] = scene.sceneName ?? scene.name
 		}
 
 		this.setVariableValues(values)
@@ -149,6 +181,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		if (ch) {
 			this.channelStates.set(channelId, { ...ch, isMuted })
 		}
+		this.syncVariables()
 		this.checkFeedbacks('channel_muted')
 	}
 

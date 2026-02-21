@@ -7,13 +7,22 @@ export function UpdateVariableDefinitions(self: ModuleInstance): void {
 		{ variableId: 'channel_count', name: 'Channel Count' },
 	]
 
-	// Register per-channel variables for all known channels.
-	// If channels haven't been fetched yet, fall back to the last known count
-	// from systemStatus so definitions are still registered on reconnect.
+	// Always derive channel IDs from channelStates when available.
+	// The fallback generates standard channels 1–N plus the known special
+	// channel range (129–135) so definitions are never lost on reconnect.
 	const channelIds =
 		self.channelStates.size > 0
 			? [...self.channelStates.keys()]
-			: Array.from({ length: self.systemStatus?.channelCount ?? 0 }, (_, i) => i + 1)
+			: [
+					...Array.from({ length: self.systemStatus?.channelCount ?? 0 }, (_, i) => i + 1),
+					129,
+					130,
+					131,
+					132,
+					133,
+					134,
+					135,
+				]
 
 	for (const id of channelIds) {
 		definitions.push(
@@ -25,6 +34,10 @@ export function UpdateVariableDefinitions(self: ModuleInstance): void {
 			{ variableId: `ch${id}_mode`, name: `Channel ${id} Mode (AI VAD/Gate)` },
 			{ variableId: `ch${id}_hpf`, name: `Channel ${id} High Pass Filter (On/Off)` },
 		)
+	}
+
+	for (const scene of self.sceneSlots) {
+		definitions.push({ variableId: `scene${scene.slotNumber}_name`, name: `Scene Slot ${scene.slotNumber} Name` })
 	}
 
 	self.setVariableDefinitions(definitions)
