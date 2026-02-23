@@ -112,10 +112,18 @@ export class VVDApi {
 		await this.request('GET', `/api/state/togglemutechannel/${channelId}`)
 	}
 
+	async setChannelMode(channelId: number, mode: boolean): Promise<void> {
+		await this.request('PUT', `/api/v2/channels/${channelId}`, { useAiVad: mode })
+	}
+
 	// Triggers
 
 	async executeTrigger(channelId: number, slotId: number): Promise<void> {
 		await this.request('POST', `/api/v2/channels/${channelId}/triggers/${slotId}/execute`)
+	}
+
+	async executeBroadcastTrigger(broadcastTriggerId: string): Promise<void> {
+		await this.request('GET', `/api/v2/broadcast/${broadcastTriggerId}`)
 	}
 
 	// Scenes (used for broadcast channel switching)

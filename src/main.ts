@@ -17,14 +17,6 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	activeSceneSlot: number | null = null
 	sceneSlots: VVDSceneSlot[] = []
 
-	get channelMuteStates(): Map<number, boolean> {
-		const mutes = new Map<number, boolean>()
-		for (const [id, ch] of this.channelStates) {
-			mutes.set(id, ch.isMuted)
-		}
-		return mutes
-	}
-
 	private pollTimer: ReturnType<typeof setInterval> | null = null
 
 	constructor(internal: unknown) {
@@ -183,6 +175,15 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		}
 		this.syncVariables()
 		this.checkFeedbacks('channel_muted')
+	}
+
+	updateChannelMode(channelId: number, useAiVad: boolean): void {
+		const ch = this.channelStates.get(channelId)
+		if (ch) {
+			this.channelStates.set(channelId, { ...ch, useAiVad })
+		}
+		this.syncVariables()
+		this.checkFeedbacks('channel_mode')
 	}
 
 	updateActions(): void {

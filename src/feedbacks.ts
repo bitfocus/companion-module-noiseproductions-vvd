@@ -1,5 +1,6 @@
 import { combineRgb } from '@companion-module/base'
 import type { ModuleInstance } from './main.js'
+import { CHANNEL_MAX } from './constants.js'
 
 export function UpdateFeedbacks(self: ModuleInstance): void {
 	self.setFeedbackDefinitions({
@@ -42,12 +43,12 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 					label: 'Channel',
 					default: 1,
 					min: 1,
-					max: 64,
+					max: CHANNEL_MAX,
 				},
 			],
 			callback: (feedback) => {
 				const channelId = Number(feedback.options.channel)
-				return self.channelMuteStates.get(channelId) ?? false
+				return self.channelStates.get(channelId)?.isMuted ?? false
 			},
 		},
 
@@ -65,7 +66,7 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 					label: 'Channel',
 					default: 1,
 					min: 1,
-					max: 64,
+					max: CHANNEL_MAX,
 				},
 				{
 					id: 'mode',
@@ -99,7 +100,7 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 					label: 'Channel',
 					default: 1,
 					min: 1,
-					max: 64,
+					max: CHANNEL_MAX,
 				},
 			],
 			callback: (feedback) => {

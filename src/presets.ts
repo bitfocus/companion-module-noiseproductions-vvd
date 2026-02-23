@@ -1,4 +1,5 @@
 import type { ModuleInstance } from './main.js'
+import { CHANNEL_SPECIAL_MIN } from './constants.js'
 import { CompanionPresetDefinitions, combineRgb } from '@companion-module/base'
 
 const WHITE = combineRgb(255, 255, 255)
@@ -13,12 +14,12 @@ const DARK_GREY = combineRgb(50, 50, 50)
 
 /** Channel IDs with channelNumber < 129 (standard mic channels) */
 function getStandardChannelIds(self: ModuleInstance): number[] {
-	return [...self.channelStates.keys()].filter((id) => id < 129).sort((a, b) => a - b)
+	return [...self.channelStates.keys()].filter((id) => id < CHANNEL_SPECIAL_MIN).sort((a, b) => a - b)
 }
 
 /** Channel IDs with channelNumber >= 129 (special system channels) */
 function getSpecialChannelIds(self: ModuleInstance): number[] {
-	return [...self.channelStates.keys()].filter((id) => id >= 129).sort((a, b) => a - b)
+	return [...self.channelStates.keys()].filter((id) => id >= CHANNEL_SPECIAL_MIN).sort((a, b) => a - b)
 }
 
 export function UpdatePresets(self: ModuleInstance): void {
@@ -162,7 +163,7 @@ export function UpdatePresets(self: ModuleInstance): void {
 				bgcolor: DARK_GREY,
 				show_topbar: false,
 			},
-			steps: [{ down: [], up: [] }],
+			steps: [{ down: [{ actionId: 'set_channel_mode', options: { channel: ch, mode: 'toggle' } }], up: [] }],
 			feedbacks: [
 				{
 					feedbackId: 'channel_mode',
@@ -224,6 +225,23 @@ export function UpdatePresets(self: ModuleInstance): void {
 				steps: [{ down: [{ actionId: 'trigger_channel', options: { channel: ch, slot } }], up: [] }],
 				feedbacks: [],
 			}
+		}
+	}
+
+	presets['header_broadcast'] = { type: 'text', category: 'Broadcast', name: 'Broadcast', text: '' }
+	for (const trigger of [
+		{ id: 'onair', label: 'On Air' },
+		{ id: 'offair', label: 'Off Air' },
+		{ id: 'musicbreak', label: 'Music Break' },
+		{ id: 'adbreak', label: 'Ad Break' },
+	]) {
+		presets[`broadcast_trigger_${trigger.id}`] = {
+			type: 'button',
+			category: 'Broadcast',
+			name: `Broadcast Trigger ${trigger.label}`,
+			style: { text: `TRIGGER\n${trigger.label}`, size: 'auto', color: WHITE, bgcolor: ORANGE, show_topbar: false },
+			steps: [{ down: [{ actionId: 'trigger_broadcast', options: { broadcastTrigger: trigger.id } }], up: [] }],
+			feedbacks: [],
 		}
 	}
 

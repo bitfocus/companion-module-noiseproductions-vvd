@@ -1,5 +1,6 @@
 import type { CompanionVariableDefinition } from '@companion-module/base'
 import type { ModuleInstance } from './main.js'
+import { CHANNEL_SPECIAL_MIN, CHANNEL_MAX } from './constants.js'
 
 export function UpdateVariableDefinitions(self: ModuleInstance): void {
 	const definitions: CompanionVariableDefinition[] = [
@@ -15,13 +16,7 @@ export function UpdateVariableDefinitions(self: ModuleInstance): void {
 			? [...self.channelStates.keys()]
 			: [
 					...Array.from({ length: self.systemStatus?.channelCount ?? 0 }, (_, i) => i + 1),
-					129,
-					130,
-					131,
-					132,
-					133,
-					134,
-					135,
+					...Array.from({ length: CHANNEL_MAX - CHANNEL_SPECIAL_MIN + 1 }, (_, i) => i + CHANNEL_SPECIAL_MIN),
 				]
 
 	for (const id of channelIds) {

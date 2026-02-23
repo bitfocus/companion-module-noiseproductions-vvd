@@ -1,4 +1,5 @@
 import type { ModuleInstance } from './main.js'
+import { CHANNEL_MAX } from './constants.js'
 
 export function UpdateActions(self: ModuleInstance): void {
 	self.setActionDefinitions({
@@ -57,7 +58,7 @@ export function UpdateActions(self: ModuleInstance): void {
 					label: 'Channel',
 					default: 1,
 					min: 1,
-					max: 135,
+					max: CHANNEL_MAX,
 				},
 			],
 			callback: async (event) => {
@@ -80,7 +81,7 @@ export function UpdateActions(self: ModuleInstance): void {
 					label: 'Channel',
 					default: 1,
 					min: 1,
-					max: 135,
+					max: CHANNEL_MAX,
 				},
 			],
 			callback: async (event) => {
@@ -103,20 +104,57 @@ export function UpdateActions(self: ModuleInstance): void {
 					label: 'Channel',
 					default: 1,
 					min: 1,
-					max: 135,
+					max: CHANNEL_MAX,
 				},
 			],
 			callback: async (event) => {
 				const channelId = Number(event.options.channel)
 				try {
 					await self.api.toggleMuteChannel(channelId)
-					const current = self.channelMuteStates.get(channelId) ?? false
+					const current = self.channelStates.get(channelId)?.isMuted ?? false
 					self.updateMuteState(channelId, !current)
 				} catch (err) {
 					self.log('error', `Toggle Mute Channel ${channelId} failed: ${err}`)
 				}
 			},
 		},
+
+		/* set_channel_mode: {
+			name: 'Set Channel Mode',
+			options: [
+				{
+					id: 'channel',
+					type: 'number',
+					label: 'Channel',
+					default: 1,
+					min: 1,
+					max: CHANNEL_MAX,
+				},
+				{
+					id: 'mode',
+					type: 'dropdown',
+					label: 'Mode',
+					default: 'ai_vad',
+					choices: [
+						{ id: 'toggle', label: 'Toggle' },
+						{ id: 'ai_vad', label: 'AI VAD' },
+						{ id: 'gate', label: 'Level' },
+					],
+				},
+			],
+			callback: async (event) => {
+				const channelId = Number(event.options.channel)
+				const choice = event.options.mode as string
+				const currentUseAiVad = self.channelStates.get(channelId)?.useAiVad ?? false
+				const useAiVad = choice === 'toggle' ? !currentUseAiVad : choice === 'ai_vad'
+				try {
+					self.log('info', `Set Channel Mode ${channelId} ${useAiVad}`)
+					await self.api.setChannelMode(channelId, useAiVad)
+				} catch (err) {
+					self.log('error', `Set Channel Mode ${channelId} ${event.options.mode} failed: ${err}`)
+				}
+			},
+		}, */
 
 		trigger_channel: {
 			name: 'Trigger Channel Manually',
@@ -127,7 +165,7 @@ export function UpdateActions(self: ModuleInstance): void {
 					label: 'Channel',
 					default: 1,
 					min: 1,
-					max: 135,
+					max: CHANNEL_MAX,
 				},
 				{
 					id: 'slot',
@@ -190,6 +228,32 @@ export function UpdateActions(self: ModuleInstance): void {
 					await self.api.loadSceneByName(sceneName)
 				} catch (err) {
 					self.log('error', `Load Scene "${sceneName}" failed: ${err}`)
+				}
+			},
+		},
+		trigger_broadcast: {
+			name: 'Broadcast Trigger',
+			options: [
+				{
+					id: 'broadcastTrigger',
+					type: 'dropdown',
+					label: 'Broadcast Trigger',
+					choices: [
+						{ id: 'onair', label: 'On Air' },
+						{ id: 'offair', label: 'Off Air' },
+						{ id: 'musicbreak', label: 'Music Break' },
+						{ id: 'adbreak', label: 'Ad Break' },
+					],
+					default: 'onair',
+				},
+			],
+			callback: async (event) => {
+				const trigger = String(event.options.broadcastTrigger).trim()
+				if (!trigger) return
+				try {
+					await self.api.executeBroadcastTrigger(trigger)
+				} catch (err) {
+					self.log('error', `Execute Broadcast Trigger "${trigger}" failed: ${err}`)
 				}
 			},
 		},
