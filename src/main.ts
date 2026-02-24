@@ -76,10 +76,9 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 
 	private startPolling(): void {
 		this.stopPolling()
-		const interval = this.config.pollInterval ?? 2000
 		this.pollTimer = setInterval(() => {
 			void this.poll()
-		}, interval)
+		}, 1000)
 	}
 
 	private stopPolling(): void {
