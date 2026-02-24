@@ -3,48 +3,32 @@ import { CHANNEL_MAX } from './constants.js'
 
 export function UpdateActions(self: ModuleInstance): void {
 	self.setActionDefinitions({
-		power_on: {
-			name: 'Power On',
-			options: [],
-			callback: async () => {
+		power: {
+			name: 'Power',
+			options: [
+				{
+					id: 'mode',
+					type: 'dropdown',
+					label: 'Mode',
+					default: 'toggle',
+					choices: [
+						{ id: 'toggle', label: 'Toggle' },
+						{ id: 'on', label: 'On' },
+						{ id: 'off', label: 'Off' },
+					],
+				},
+			],
+			callback: async (event) => {
+				const mode = event.options.mode as string
+				const current = self.systemStatus?.power ?? false
+				const newState = mode === 'toggle' ? !current : mode === 'on'
 				try {
-					await self.api.setPower(true)
-					if (self.systemStatus) self.systemStatus.power = true
-					self.syncVariables()
-					self.checkFeedbacks('power_state')
-				} catch (err) {
-					self.log('error', `Power On failed: ${err}`)
-				}
-			},
-		},
-
-		power_off: {
-			name: 'Power Off',
-			options: [],
-			callback: async () => {
-				try {
-					await self.api.setPower(false)
-					if (self.systemStatus) self.systemStatus.power = false
-					self.syncVariables()
-					self.checkFeedbacks('power_state')
-				} catch (err) {
-					self.log('error', `Power Off failed: ${err}`)
-				}
-			},
-		},
-
-		power_toggle: {
-			name: 'Power Toggle',
-			options: [],
-			callback: async () => {
-				try {
-					const newState = !(self.systemStatus?.power ?? false)
 					await self.api.setPower(newState)
 					if (self.systemStatus) self.systemStatus.power = newState
 					self.syncVariables()
 					self.checkFeedbacks('power_state')
 				} catch (err) {
-					self.log('error', `Power Toggle failed: ${err}`)
+					self.log('error', `Power ${mode} failed: ${err}`)
 				}
 			},
 		},
@@ -60,61 +44,32 @@ export function UpdateActions(self: ModuleInstance): void {
 					min: 1,
 					max: CHANNEL_MAX,
 				},
-			],
-			callback: async (event) => {
-				const channelId = Number(event.options.channel)
-				try {
-					await self.api.muteChannel(channelId)
-					self.updateMuteState(channelId, true)
-				} catch (err) {
-					self.log('error', `Mute Channel ${channelId} failed: ${err}`)
-				}
-			},
-		},
-
-		unmute_channel: {
-			name: 'Unmute Channel',
-			options: [
 				{
-					id: 'channel',
-					type: 'number',
-					label: 'Channel',
-					default: 1,
-					min: 1,
-					max: CHANNEL_MAX,
+					id: 'mode',
+					type: 'dropdown',
+					label: 'Mode',
+					default: 'toggle',
+					choices: [
+						{ id: 'toggle', label: 'Toggle' },
+						{ id: 'on', label: 'On' },
+						{ id: 'off', label: 'Off' },
+					],
 				},
 			],
 			callback: async (event) => {
 				const channelId = Number(event.options.channel)
+				const mode = event.options.mode as string
+				const current = self.channelStates.get(channelId)?.isMuted ?? false
+				const newState = mode === 'toggle' ? !current : mode === 'on'
 				try {
-					await self.api.unmuteChannel(channelId)
-					self.updateMuteState(channelId, false)
+					if (newState) {
+						await self.api.muteChannel(channelId)
+					} else {
+						await self.api.unmuteChannel(channelId)
+					}
+					self.updateMuteState(channelId, newState)
 				} catch (err) {
-					self.log('error', `Unmute Channel ${channelId} failed: ${err}`)
-				}
-			},
-		},
-
-		toggle_mute_channel: {
-			name: 'Toggle Mute Channel',
-			options: [
-				{
-					id: 'channel',
-					type: 'number',
-					label: 'Channel',
-					default: 1,
-					min: 1,
-					max: CHANNEL_MAX,
-				},
-			],
-			callback: async (event) => {
-				const channelId = Number(event.options.channel)
-				try {
-					await self.api.toggleMuteChannel(channelId)
-					const current = self.channelStates.get(channelId)?.isMuted ?? false
-					self.updateMuteState(channelId, !current)
-				} catch (err) {
-					self.log('error', `Toggle Mute Channel ${channelId} failed: ${err}`)
+					self.log('error', `Mute Channel ${channelId} ${mode} failed: ${err}`)
 				}
 			},
 		},

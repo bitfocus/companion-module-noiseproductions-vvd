@@ -103,14 +103,26 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 			}
 			const prevEnabledChannelCount = [...this.channelStates.values()].filter((ch) => ch.isEnabled).length
 			const prevOccupiedSceneCount = this.sceneSlots.filter((s) => s.hasScene).length
+			const prevOccupiedTriggerCount = [...this.channelStates.values()].reduce(
+				(sum, ch) => sum + ch.triggerSlots.filter((s) => s.triggerInstanceId !== null).length,
+				0,
+			)
 			this.systemStatus = status
 			this.applyChannelStates(channels)
 			this.activeSceneSlot = activeScene?.hasActiveScene ? (activeScene.activeSlot ?? null) : null
 			if (scenes !== null) this.sceneSlots = scenes
 			const newEnabledChannelCount = [...this.channelStates.values()].filter((ch) => ch.isEnabled).length
 			const newOccupiedSceneCount = this.sceneSlots.filter((s) => s.hasScene).length
-			// Regenerate presets if enabled channel count or occupied scene count changed
-			if (newEnabledChannelCount !== prevEnabledChannelCount || newOccupiedSceneCount !== prevOccupiedSceneCount) {
+			const newOccupiedTriggerCount = [...this.channelStates.values()].reduce(
+				(sum, ch) => sum + ch.triggerSlots.filter((s) => s.triggerInstanceId !== null).length,
+				0,
+			)
+			// Regenerate presets if enabled channel count, occupied scene count, or occupied trigger count changed
+			if (
+				newEnabledChannelCount !== prevEnabledChannelCount ||
+				newOccupiedSceneCount !== prevOccupiedSceneCount ||
+				newOccupiedTriggerCount !== prevOccupiedTriggerCount
+			) {
 				this.updateVariableDefinitions()
 				this.updatePresets()
 			}

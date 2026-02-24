@@ -29,22 +29,83 @@ export function UpdatePresets(self: ModuleInstance): void {
 
 	// ── Power controls ────────────────────────────────────────────────────────
 
+	presets['power_status'] = {
+		type: 'button',
+		category: 'Power',
+		name: 'Power Status',
+		style: {
+			text: 'POWER STATUS\n$(vvd:power)',
+			size: 12,
+			color: WHITE,
+			bgcolor: BLACK,
+			show_topbar: false,
+		},
+		steps: [{ down: [{ actionId: 'power', options: { mode: 'toggle' } }], up: [] }],
+		feedbacks: [
+			{
+				feedbackId: 'power_state',
+				options: {},
+				isInverted: true,
+				style: { bgcolor: RED, color: WHITE },
+			},
+			{
+				feedbackId: 'power_state',
+				options: {},
+				style: { bgcolor: GREEN, color: WHITE },
+			},
+		],
+	}
+
+	presets['power_toggle'] = {
+		type: 'button',
+		category: 'Power',
+		name: 'Power Toggle',
+		style: {
+			text: 'TOGGLE POWER',
+			size: 12,
+			color: WHITE,
+			bgcolor: BLACK,
+			show_topbar: false,
+		},
+		previewStyle: {
+			text: 'TOGGLE POWER',
+			size: 12,
+			color: WHITE,
+			bgcolor: BLACK,
+			show_topbar: false,
+		},
+		steps: [{ down: [{ actionId: 'power', options: { mode: 'toggle' } }], up: [] }],
+		feedbacks: [
+			{
+				feedbackId: 'power_state',
+				options: {},
+				isInverted: true,
+				style: { text: 'POWER\nOFF', bgcolor: RED, color: WHITE },
+			},
+			{
+				feedbackId: 'power_state',
+				options: {},
+				style: { text: 'POWER\nON', bgcolor: GREEN, color: WHITE },
+			},
+		],
+	}
+
 	presets['power_on'] = {
 		type: 'button',
 		category: 'Power',
 		name: 'Power On',
 		style: {
 			text: 'POWER\nON',
-			size: 'auto',
+			size: 12,
 			color: WHITE,
-			bgcolor: GREEN,
+			bgcolor: BLACK,
 			show_topbar: false,
 		},
-		steps: [{ down: [{ actionId: 'power_on', options: {} }], up: [] }],
+		steps: [{ down: [{ actionId: 'power', options: { mode: 'on' } }], up: [] }],
 		feedbacks: [
 			{
 				feedbackId: 'power_state',
-				options: { state: 'on' },
+				options: {},
 				style: { bgcolor: GREEN, color: WHITE },
 			},
 		],
@@ -56,38 +117,18 @@ export function UpdatePresets(self: ModuleInstance): void {
 		name: 'Power Off',
 		style: {
 			text: 'POWER\nOFF',
-			size: 'auto',
-			color: WHITE,
-			bgcolor: RED,
-			show_topbar: false,
-		},
-		steps: [{ down: [{ actionId: 'power_off', options: {} }], up: [] }],
-		feedbacks: [
-			{
-				feedbackId: 'power_state',
-				options: { state: 'off' },
-				style: { bgcolor: RED, color: WHITE },
-			},
-		],
-	}
-
-	presets['power_toggle'] = {
-		type: 'button',
-		category: 'Power',
-		name: 'Power Toggle',
-		style: {
-			text: 'POWER\n$(vvd:power)',
-			size: 'auto',
+			size: 12,
 			color: WHITE,
 			bgcolor: BLACK,
 			show_topbar: false,
 		},
-		steps: [{ down: [{ actionId: 'power_toggle', options: {} }], up: [] }],
+		steps: [{ down: [{ actionId: 'power', options: { mode: 'off' } }], up: [] }],
 		feedbacks: [
 			{
 				feedbackId: 'power_state',
-				options: { state: 'on' },
-				style: { bgcolor: GREEN, color: WHITE },
+				options: {},
+				isInverted: true,
+				style: { bgcolor: RED, color: WHITE },
 			},
 		],
 	}
@@ -98,7 +139,7 @@ export function UpdatePresets(self: ModuleInstance): void {
 	const category = 'Channels'
 
 	// ── Channel Info ──
-	presets['header_info'] = { type: 'text', category, name: 'Channel Info', text: '' }
+	presets['header_info'] = { type: 'text', category, name: 'Channel Status', text: '' }
 
 	for (const ch of CHANNEL_IDS) {
 		const name = `$(vvd:ch${ch}_name)`
@@ -107,8 +148,8 @@ export function UpdatePresets(self: ModuleInstance): void {
 			category,
 			name: `Channel ${ch} Info`,
 			style: {
-				text: `${name}\n$(vvd:ch${ch}_gain)\n$(vvd:ch${ch}_muted)`,
-				size: 'auto',
+				text: `${name}\n\n$(vvd:ch${ch}_gain)\n$(vvd:ch${ch}_muted)`,
+				size: 14,
 				color: WHITE,
 				bgcolor: DARK_GREY,
 				show_topbar: false,
@@ -127,9 +168,15 @@ export function UpdatePresets(self: ModuleInstance): void {
 			type: 'button',
 			category,
 			name: `Mute Channel ${ch}`,
-			style: { text: `${name}\nMUTE`, size: 'auto', color: WHITE, bgcolor: DARK_GREY, show_topbar: false },
-			steps: [{ down: [{ actionId: 'toggle_mute_channel', options: { channel: ch } }], up: [] }],
-			feedbacks: [{ feedbackId: 'channel_muted', options: { channel: ch }, style: { bgcolor: RED, color: WHITE } }],
+			style: { text: `UNMUTED\n${name}`, size: 12, color: WHITE, bgcolor: DARK_GREY, show_topbar: false },
+			steps: [{ down: [{ actionId: 'mute_channel', options: { channel: ch, mode: 'toggle' } }], up: [] }],
+			feedbacks: [
+				{
+					feedbackId: 'channel_muted',
+					options: { channel: ch },
+					style: { text: `MUTED\n${name}`, bgcolor: RED, color: WHITE },
+				},
+			],
 		}
 	}
 
@@ -141,14 +188,20 @@ export function UpdatePresets(self: ModuleInstance): void {
 			type: 'button',
 			category,
 			name: `Mute Channel ${ch}`,
-			style: { text: `${name}\nMUTE`, size: 'auto', color: WHITE, bgcolor: DARK_GREY, show_topbar: false },
-			steps: [{ down: [{ actionId: 'toggle_mute_channel', options: { channel: ch } }], up: [] }],
-			feedbacks: [{ feedbackId: 'channel_muted', options: { channel: ch }, style: { bgcolor: RED, color: WHITE } }],
+			style: { text: `UNMUTED\n${name}`, size: 12, color: WHITE, bgcolor: DARK_GREY, show_topbar: false },
+			steps: [{ down: [{ actionId: 'mute_channel', options: { channel: ch, mode: 'toggle' } }], up: [] }],
+			feedbacks: [
+				{
+					feedbackId: 'channel_muted',
+					options: { channel: ch },
+					style: { text: `MUTED\n${name}`, bgcolor: RED, color: WHITE },
+				},
+			],
 		}
 	}
 
 	// ── Channel Mode ──
-	presets['header_mode'] = { type: 'text', category, name: 'Channel Mode', text: '' }
+	presets['header_mode'] = { type: 'text', category, name: 'Channel Mode Status', text: '' }
 
 	for (const ch of CHANNEL_IDS) {
 		const name = `$(vvd:ch${ch}_name)`
@@ -157,8 +210,8 @@ export function UpdatePresets(self: ModuleInstance): void {
 			category,
 			name: `Channel ${ch} Mode`,
 			style: {
-				text: `${name}\n$(vvd:ch${ch}_mode)`,
-				size: 'auto',
+				text: `${name}\nMODE\n$(vvd:ch${ch}_mode)`,
+				size: 14,
 				color: WHITE,
 				bgcolor: DARK_GREY,
 				show_topbar: false,
@@ -175,7 +228,7 @@ export function UpdatePresets(self: ModuleInstance): void {
 	}
 
 	// ── High Pass Filter ──
-	presets['header_hpf'] = { type: 'text', category, name: 'High Pass Filter', text: '' }
+	presets['header_hpf'] = { type: 'text', category, name: 'High Pass Filter Status', text: '' }
 
 	for (const ch of CHANNEL_IDS) {
 		const name = `$(vvd:ch${ch}_name)`
@@ -184,8 +237,8 @@ export function UpdatePresets(self: ModuleInstance): void {
 			category,
 			name: `Channel ${ch} High Pass Filter`,
 			style: {
-				text: `${name}\nHPF: $(vvd:ch${ch}_hpf)`,
-				size: 'auto',
+				text: `${name}\nHPF\n$(vvd:ch${ch}_hpf)`,
+				size: 14,
 				color: WHITE,
 				bgcolor: DARK_GREY,
 				show_topbar: false,
@@ -200,12 +253,15 @@ export function UpdatePresets(self: ModuleInstance): void {
 
 	for (const ch of CHANNEL_IDS) {
 		const name = `$(vvd:ch${ch}_name)`
-		for (let slot = 1; slot <= 4; slot++) {
+		const occupiedSlots = (self.channelStates.get(ch)?.triggerSlots ?? []).filter((s) => s.triggerInstanceId !== null)
+		for (const triggerSlot of occupiedSlots) {
+			const slot = triggerSlot.slotNumber
+			const label = triggerSlot.parameterDisplayName ?? `TRIG ${slot}`
 			presets[`trigger_ch${ch}_slot${slot}`] = {
 				type: 'button',
 				category,
 				name: `Channel ${ch} Trigger ${slot}`,
-				style: { text: `${name}\nTRIG ${slot}`, size: 'auto', color: WHITE, bgcolor: ORANGE, show_topbar: false },
+				style: { text: `${name}\n${label}`, size: 'auto', color: WHITE, bgcolor: ORANGE, show_topbar: false },
 				steps: [{ down: [{ actionId: 'trigger_channel', options: { channel: ch, slot } }], up: [] }],
 				feedbacks: [],
 			}
@@ -216,12 +272,15 @@ export function UpdatePresets(self: ModuleInstance): void {
 
 	for (const ch of SPECIAL_CHANNEL_IDS) {
 		const name = `$(vvd:ch${ch}_name)`
-		for (let slot = 1; slot <= 4; slot++) {
+		const occupiedSlots = (self.channelStates.get(ch)?.triggerSlots ?? []).filter((s) => s.triggerInstanceId !== null)
+		for (const triggerSlot of occupiedSlots) {
+			const slot = triggerSlot.slotNumber
+			const label = triggerSlot.parameterDisplayName ?? `TRIG ${slot}`
 			presets[`trigger_ch${ch}_slot${slot}`] = {
 				type: 'button',
 				category,
 				name: `Channel ${ch} Trigger ${slot}`,
-				style: { text: `${name}\nTRIG ${slot}`, size: 'auto', color: WHITE, bgcolor: ORANGE, show_topbar: false },
+				style: { text: `${name}\n${label}`, size: 'auto', color: WHITE, bgcolor: ORANGE, show_topbar: false },
 				steps: [{ down: [{ actionId: 'trigger_channel', options: { channel: ch, slot } }], up: [] }],
 				feedbacks: [],
 			}
@@ -239,7 +298,7 @@ export function UpdatePresets(self: ModuleInstance): void {
 			type: 'button',
 			category: 'Broadcast',
 			name: `Broadcast Trigger ${trigger.label}`,
-			style: { text: `TRIGGER\n${trigger.label}`, size: 'auto', color: WHITE, bgcolor: ORANGE, show_topbar: false },
+			style: { text: `TRIGGER\n${trigger.label}`, size: 12, color: WHITE, bgcolor: ORANGE, show_topbar: false },
 			steps: [{ down: [{ actionId: 'trigger_broadcast', options: { broadcastTrigger: trigger.id } }], up: [] }],
 			feedbacks: [],
 		}

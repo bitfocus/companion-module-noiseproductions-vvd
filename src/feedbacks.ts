@@ -5,27 +5,16 @@ import { CHANNEL_MAX } from './constants.js'
 export function UpdateFeedbacks(self: ModuleInstance): void {
 	self.setFeedbackDefinitions({
 		power_state: {
-			name: 'Power State',
+			name: 'Power Status',
 			type: 'boolean',
 			defaultStyle: {
 				bgcolor: combineRgb(0, 200, 0),
 				color: combineRgb(0, 0, 0),
 			},
-			options: [
-				{
-					id: 'state',
-					type: 'dropdown',
-					label: 'Expected State',
-					default: 'on',
-					choices: [
-						{ id: 'on', label: 'On' },
-						{ id: 'off', label: 'Off' },
-					],
-				},
-			],
-			callback: (feedback) => {
+			options: [],
+			callback: () => {
 				const isPowered = self.systemStatus?.power ?? false
-				return feedback.options.state === 'on' ? isPowered : !isPowered
+				return isPowered
 			},
 		},
 
@@ -71,7 +60,7 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 				{
 					id: 'mode',
 					type: 'dropdown',
-					label: 'Expected Mode',
+					label: 'Mode',
 					default: 'ai_vad',
 					choices: [
 						{ id: 'ai_vad', label: 'AI VAD' },
