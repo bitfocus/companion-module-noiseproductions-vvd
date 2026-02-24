@@ -108,10 +108,6 @@ export class VVDApi {
 		await this.request('POST', `/api/v2/channels/${channelId}/unmute`)
 	}
 
-	async toggleMuteChannel(channelId: number): Promise<void> {
-		await this.request('GET', `/api/state/togglemutechannel/${channelId}`)
-	}
-
 	async setChannelMode(channelId: number, mode: boolean): Promise<void> {
 		await this.request('PUT', `/api/v2/channels/${channelId}`, { useAiVad: mode })
 	}

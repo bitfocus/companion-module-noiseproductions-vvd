@@ -1,16 +1,6 @@
 import type { ModuleInstance } from './main.js'
-import { CHANNEL_SPECIAL_MIN } from './constants.js'
-import { CompanionPresetDefinitions, combineRgb } from '@companion-module/base'
-
-const WHITE = combineRgb(255, 255, 255)
-const BLACK = combineRgb(0, 0, 0)
-const GREEN = combineRgb(0, 180, 0)
-const RED = combineRgb(200, 0, 0)
-const ORANGE = combineRgb(220, 120, 0)
-const BLUE = combineRgb(0, 100, 220)
-const PURPLE = combineRgb(130, 0, 200)
-const CYAN = combineRgb(0, 180, 220)
-const DARK_GREY = combineRgb(50, 50, 50)
+import { CHANNEL_SPECIAL_MIN, COLORS } from './constants.js'
+import { CompanionPresetDefinitions } from '@companion-module/base'
 
 /** Channel IDs with channelNumber < 129 (standard mic channels) */
 function getStandardChannelIds(self: ModuleInstance): number[] {
@@ -36,8 +26,8 @@ export function UpdatePresets(self: ModuleInstance): void {
 		style: {
 			text: 'POWER STATUS\n$(vvd:power)',
 			size: 12,
-			color: WHITE,
-			bgcolor: BLACK,
+			color: COLORS.WHITE,
+			bgcolor: COLORS.BLACK,
 			show_topbar: false,
 		},
 		steps: [{ down: [{ actionId: 'power', options: { mode: 'toggle' } }], up: [] }],
@@ -46,12 +36,12 @@ export function UpdatePresets(self: ModuleInstance): void {
 				feedbackId: 'power_state',
 				options: {},
 				isInverted: true,
-				style: { bgcolor: RED, color: WHITE },
+				style: { bgcolor: COLORS.RED, color: COLORS.WHITE },
 			},
 			{
 				feedbackId: 'power_state',
 				options: {},
-				style: { bgcolor: GREEN, color: WHITE },
+				style: { bgcolor: COLORS.GREEN, color: COLORS.WHITE },
 			},
 		],
 	}
@@ -63,15 +53,15 @@ export function UpdatePresets(self: ModuleInstance): void {
 		style: {
 			text: 'TOGGLE POWER',
 			size: 12,
-			color: WHITE,
-			bgcolor: BLACK,
+			color: COLORS.WHITE,
+			bgcolor: COLORS.BLACK,
 			show_topbar: false,
 		},
 		previewStyle: {
 			text: 'TOGGLE POWER',
 			size: 12,
-			color: WHITE,
-			bgcolor: BLACK,
+			color: COLORS.WHITE,
+			bgcolor: COLORS.BLACK,
 			show_topbar: false,
 		},
 		steps: [{ down: [{ actionId: 'power', options: { mode: 'toggle' } }], up: [] }],
@@ -80,12 +70,12 @@ export function UpdatePresets(self: ModuleInstance): void {
 				feedbackId: 'power_state',
 				options: {},
 				isInverted: true,
-				style: { text: 'POWER\nOFF', bgcolor: RED, color: WHITE },
+				style: { text: 'POWER\nOFF', bgcolor: COLORS.RED, color: COLORS.WHITE },
 			},
 			{
 				feedbackId: 'power_state',
 				options: {},
-				style: { text: 'POWER\nON', bgcolor: GREEN, color: WHITE },
+				style: { text: 'POWER\nON', bgcolor: COLORS.GREEN, color: COLORS.WHITE },
 			},
 		],
 	}
@@ -97,8 +87,8 @@ export function UpdatePresets(self: ModuleInstance): void {
 		style: {
 			text: 'POWER\nON',
 			size: 12,
-			color: WHITE,
-			bgcolor: BLACK,
+			color: COLORS.WHITE,
+			bgcolor: COLORS.BLACK,
 			show_topbar: false,
 		},
 		steps: [{ down: [{ actionId: 'power', options: { mode: 'on' } }], up: [] }],
@@ -106,7 +96,7 @@ export function UpdatePresets(self: ModuleInstance): void {
 			{
 				feedbackId: 'power_state',
 				options: {},
-				style: { bgcolor: GREEN, color: WHITE },
+				style: { bgcolor: COLORS.GREEN, color: COLORS.WHITE },
 			},
 		],
 	}
@@ -118,8 +108,8 @@ export function UpdatePresets(self: ModuleInstance): void {
 		style: {
 			text: 'POWER\nOFF',
 			size: 12,
-			color: WHITE,
-			bgcolor: BLACK,
+			color: COLORS.WHITE,
+			bgcolor: COLORS.BLACK,
 			show_topbar: false,
 		},
 		steps: [{ down: [{ actionId: 'power', options: { mode: 'off' } }], up: [] }],
@@ -128,7 +118,7 @@ export function UpdatePresets(self: ModuleInstance): void {
 				feedbackId: 'power_state',
 				options: {},
 				isInverted: true,
-				style: { bgcolor: RED, color: WHITE },
+				style: { bgcolor: COLORS.RED, color: COLORS.WHITE },
 			},
 		],
 	}
@@ -150,12 +140,14 @@ export function UpdatePresets(self: ModuleInstance): void {
 			style: {
 				text: `${name}\n\n$(vvd:ch${ch}_gain)\n$(vvd:ch${ch}_muted)`,
 				size: 14,
-				color: WHITE,
-				bgcolor: DARK_GREY,
+				color: COLORS.WHITE,
+				bgcolor: COLORS.DARK_GREY,
 				show_topbar: false,
 			},
 			steps: [{ down: [], up: [] }],
-			feedbacks: [{ feedbackId: 'channel_muted', options: { channel: ch }, style: { bgcolor: RED, color: WHITE } }],
+			feedbacks: [
+				{ feedbackId: 'channel_muted', options: { channel: ch }, style: { bgcolor: COLORS.RED, color: COLORS.WHITE } },
+			],
 		}
 	}
 
@@ -168,13 +160,13 @@ export function UpdatePresets(self: ModuleInstance): void {
 			type: 'button',
 			category,
 			name: `Mute Channel ${ch}`,
-			style: { text: `UNMUTED\n${name}`, size: 12, color: WHITE, bgcolor: DARK_GREY, show_topbar: false },
+			style: { text: `UNMUTED\n${name}`, size: 12, color: COLORS.WHITE, bgcolor: COLORS.DARK_GREY, show_topbar: false },
 			steps: [{ down: [{ actionId: 'mute_channel', options: { channel: ch, mode: 'toggle' } }], up: [] }],
 			feedbacks: [
 				{
 					feedbackId: 'channel_muted',
 					options: { channel: ch },
-					style: { text: `MUTED\n${name}`, bgcolor: RED, color: WHITE },
+					style: { text: `MUTED\n${name}`, bgcolor: COLORS.RED, color: COLORS.WHITE },
 				},
 			],
 		}
@@ -188,13 +180,13 @@ export function UpdatePresets(self: ModuleInstance): void {
 			type: 'button',
 			category,
 			name: `Mute Channel ${ch}`,
-			style: { text: `UNMUTED\n${name}`, size: 12, color: WHITE, bgcolor: DARK_GREY, show_topbar: false },
+			style: { text: `UNMUTED\n${name}`, size: 12, color: COLORS.WHITE, bgcolor: COLORS.DARK_GREY, show_topbar: false },
 			steps: [{ down: [{ actionId: 'mute_channel', options: { channel: ch, mode: 'toggle' } }], up: [] }],
 			feedbacks: [
 				{
 					feedbackId: 'channel_muted',
 					options: { channel: ch },
-					style: { text: `MUTED\n${name}`, bgcolor: RED, color: WHITE },
+					style: { text: `MUTED\n${name}`, bgcolor: COLORS.RED, color: COLORS.WHITE },
 				},
 			],
 		}
@@ -212,8 +204,8 @@ export function UpdatePresets(self: ModuleInstance): void {
 			style: {
 				text: `${name}\nMODE\n$(vvd:ch${ch}_mode)`,
 				size: 14,
-				color: WHITE,
-				bgcolor: DARK_GREY,
+				color: COLORS.WHITE,
+				bgcolor: COLORS.DARK_GREY,
 				show_topbar: false,
 			},
 			steps: [{ down: [{ actionId: 'set_channel_mode', options: { channel: ch, mode: 'toggle' } }], up: [] }],
@@ -221,7 +213,12 @@ export function UpdatePresets(self: ModuleInstance): void {
 				{
 					feedbackId: 'channel_mode',
 					options: { channel: ch, mode: 'ai_vad' },
-					style: { bgcolor: BLUE, color: WHITE },
+					style: { bgcolor: COLORS.GREEN, color: COLORS.WHITE },
+				},
+				{
+					feedbackId: 'channel_mode',
+					options: { channel: ch, mode: 'gate' },
+					style: { bgcolor: COLORS.BLUE, color: COLORS.WHITE },
 				},
 			],
 		}
@@ -239,50 +236,72 @@ export function UpdatePresets(self: ModuleInstance): void {
 			style: {
 				text: `${name}\nHPF\n$(vvd:ch${ch}_hpf)`,
 				size: 14,
-				color: WHITE,
-				bgcolor: DARK_GREY,
+				color: COLORS.WHITE,
+				bgcolor: COLORS.DARK_GREY,
 				show_topbar: false,
 			},
 			steps: [{ down: [], up: [] }],
-			feedbacks: [{ feedbackId: 'channel_hpf', options: { channel: ch }, style: { bgcolor: PURPLE, color: WHITE } }],
+			feedbacks: [
+				{ feedbackId: 'channel_hpf', options: { channel: ch }, style: { bgcolor: COLORS.BLUE, color: COLORS.WHITE } },
+			],
 		}
 	}
 
 	// ── Triggers ──
-	presets['header_triggers'] = { type: 'text', category, name: 'Triggers', text: '' }
-
-	for (const ch of CHANNEL_IDS) {
-		const name = `$(vvd:ch${ch}_name)`
-		const occupiedSlots = (self.channelStates.get(ch)?.triggerSlots ?? []).filter((s) => s.triggerInstanceId !== null)
-		for (const triggerSlot of occupiedSlots) {
-			const slot = triggerSlot.slotNumber
-			const label = triggerSlot.parameterDisplayName ?? `TRIG ${slot}`
-			presets[`trigger_ch${ch}_slot${slot}`] = {
-				type: 'button',
-				category,
-				name: `Channel ${ch} Trigger ${slot}`,
-				style: { text: `${name}\n${label}`, size: 'auto', color: WHITE, bgcolor: ORANGE, show_topbar: false },
-				steps: [{ down: [{ actionId: 'trigger_channel', options: { channel: ch, slot } }], up: [] }],
-				feedbacks: [],
+	const hasStandardTriggers = CHANNEL_IDS.some((ch) =>
+		(self.channelStates.get(ch)?.triggerSlots ?? []).some((s) => s.triggerInstanceId !== null),
+	)
+	if (hasStandardTriggers) {
+		presets['header_triggers'] = { type: 'text', category, name: 'Triggers', text: '' }
+		for (const ch of CHANNEL_IDS) {
+			const name = `$(vvd:ch${ch}_name)`
+			const occupiedSlots = (self.channelStates.get(ch)?.triggerSlots ?? []).filter((s) => s.triggerInstanceId !== null)
+			for (const triggerSlot of occupiedSlots) {
+				const slot = triggerSlot.slotNumber
+				const label = triggerSlot.parameterDisplayName ?? `TRIG ${slot}`
+				presets[`trigger_ch${ch}_slot${slot}`] = {
+					type: 'button',
+					category,
+					name: `Channel ${ch} Trigger ${slot}`,
+					style: {
+						text: `${name}\n${label}`,
+						size: 'auto',
+						color: COLORS.WHITE,
+						bgcolor: COLORS.ORANGE,
+						show_topbar: false,
+					},
+					steps: [{ down: [{ actionId: 'trigger_channel', options: { channel: ch, slot } }], up: [] }],
+					feedbacks: [],
+				}
 			}
 		}
 	}
 
-	presets['header_triggers_special'] = { type: 'text', category, name: 'Special Channels - Triggers', text: '' }
-
-	for (const ch of SPECIAL_CHANNEL_IDS) {
-		const name = `$(vvd:ch${ch}_name)`
-		const occupiedSlots = (self.channelStates.get(ch)?.triggerSlots ?? []).filter((s) => s.triggerInstanceId !== null)
-		for (const triggerSlot of occupiedSlots) {
-			const slot = triggerSlot.slotNumber
-			const label = triggerSlot.parameterDisplayName ?? `TRIG ${slot}`
-			presets[`trigger_ch${ch}_slot${slot}`] = {
-				type: 'button',
-				category,
-				name: `Channel ${ch} Trigger ${slot}`,
-				style: { text: `${name}\n${label}`, size: 'auto', color: WHITE, bgcolor: ORANGE, show_topbar: false },
-				steps: [{ down: [{ actionId: 'trigger_channel', options: { channel: ch, slot } }], up: [] }],
-				feedbacks: [],
+	const hasSpecialTriggers = SPECIAL_CHANNEL_IDS.some((ch) =>
+		(self.channelStates.get(ch)?.triggerSlots ?? []).some((s) => s.triggerInstanceId !== null),
+	)
+	if (hasSpecialTriggers) {
+		presets['header_triggers_special'] = { type: 'text', category, name: 'Special Channels - Triggers', text: '' }
+		for (const ch of SPECIAL_CHANNEL_IDS) {
+			const name = `$(vvd:ch${ch}_name)`
+			const occupiedSlots = (self.channelStates.get(ch)?.triggerSlots ?? []).filter((s) => s.triggerInstanceId !== null)
+			for (const triggerSlot of occupiedSlots) {
+				const slot = triggerSlot.slotNumber
+				const label = triggerSlot.parameterDisplayName ?? `TRIG ${slot}`
+				presets[`trigger_ch${ch}_slot${slot}`] = {
+					type: 'button',
+					category,
+					name: `Channel ${ch} Trigger ${slot}`,
+					style: {
+						text: `${name}\n${label}`,
+						size: 'auto',
+						color: COLORS.WHITE,
+						bgcolor: COLORS.ORANGE,
+						show_topbar: false,
+					},
+					steps: [{ down: [{ actionId: 'trigger_channel', options: { channel: ch, slot } }], up: [] }],
+					feedbacks: [],
+				}
 			}
 		}
 	}
@@ -298,7 +317,13 @@ export function UpdatePresets(self: ModuleInstance): void {
 			type: 'button',
 			category: 'Broadcast',
 			name: `Broadcast Trigger ${trigger.label}`,
-			style: { text: `TRIGGER\n${trigger.label}`, size: 12, color: WHITE, bgcolor: ORANGE, show_topbar: false },
+			style: {
+				text: `TRIGGER\n${trigger.label}`,
+				size: 12,
+				color: COLORS.WHITE,
+				bgcolor: COLORS.ORANGE,
+				show_topbar: false,
+			},
 			steps: [{ down: [{ actionId: 'trigger_broadcast', options: { broadcastTrigger: trigger.id } }], up: [] }],
 			feedbacks: [],
 		}
@@ -316,13 +341,17 @@ export function UpdatePresets(self: ModuleInstance): void {
 				style: {
 					text: `$(vvd:scene${scene.slotNumber}_name)`,
 					size: 'auto',
-					color: WHITE,
-					bgcolor: DARK_GREY,
+					color: COLORS.WHITE,
+					bgcolor: COLORS.DARK_GREY,
 					show_topbar: false,
 				},
 				steps: [{ down: [{ actionId: 'load_scene_by_slot', options: { slot: scene.slotNumber } }], up: [] }],
 				feedbacks: [
-					{ feedbackId: 'active_scene', options: { slot: scene.slotNumber }, style: { bgcolor: CYAN, color: WHITE } },
+					{
+						feedbackId: 'active_scene',
+						options: { slot: scene.slotNumber },
+						style: { bgcolor: COLORS.CYAN, color: COLORS.WHITE },
+					},
 				],
 			}
 		}

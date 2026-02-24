@@ -1,6 +1,5 @@
-import { combineRgb } from '@companion-module/base'
 import type { ModuleInstance } from './main.js'
-import { CHANNEL_MAX } from './constants.js'
+import { CHANNEL_MAX, COLORS } from './constants.js'
 
 export function UpdateFeedbacks(self: ModuleInstance): void {
 	self.setFeedbackDefinitions({
@@ -8,8 +7,8 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 			name: 'Power Status',
 			type: 'boolean',
 			defaultStyle: {
-				bgcolor: combineRgb(0, 200, 0),
-				color: combineRgb(0, 0, 0),
+				bgcolor: COLORS.GREEN,
+				color: COLORS.BLACK,
 			},
 			options: [],
 			callback: () => {
@@ -22,8 +21,8 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 			name: 'Channel Muted',
 			type: 'boolean',
 			defaultStyle: {
-				bgcolor: combineRgb(255, 0, 0),
-				color: combineRgb(255, 255, 255),
+				bgcolor: COLORS.RED,
+				color: COLORS.WHITE,
 			},
 			options: [
 				{
@@ -45,8 +44,8 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 			name: 'Channel Mode',
 			type: 'boolean',
 			defaultStyle: {
-				bgcolor: combineRgb(0, 100, 220),
-				color: combineRgb(255, 255, 255),
+				bgcolor: COLORS.BLUE,
+				color: COLORS.WHITE,
 			},
 			options: [
 				{
@@ -79,8 +78,8 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 			name: 'Channel High Pass Filter',
 			type: 'boolean',
 			defaultStyle: {
-				bgcolor: combineRgb(180, 0, 220),
-				color: combineRgb(255, 255, 255),
+				bgcolor: COLORS.ORANGE,
+				color: COLORS.WHITE,
 			},
 			options: [
 				{
@@ -102,8 +101,8 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 			name: 'Active Scene Slot',
 			type: 'boolean',
 			defaultStyle: {
-				bgcolor: combineRgb(0, 180, 220),
-				color: combineRgb(255, 255, 255),
+				bgcolor: COLORS.CYAN,
+				color: COLORS.WHITE,
 			},
 			options: [
 				{

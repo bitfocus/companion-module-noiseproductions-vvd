@@ -189,15 +189,6 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		this.checkFeedbacks('channel_muted')
 	}
 
-	updateChannelMode(channelId: number, useAiVad: boolean): void {
-		const ch = this.channelStates.get(channelId)
-		if (ch) {
-			this.channelStates.set(channelId, { ...ch, useAiVad })
-		}
-		this.syncVariables()
-		this.checkFeedbacks('channel_mode')
-	}
-
 	updateActions(): void {
 		UpdateActions(this)
 	}
