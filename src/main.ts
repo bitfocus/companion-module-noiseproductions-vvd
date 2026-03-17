@@ -11,7 +11,6 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	config!: ModuleConfig
 	api!: VVDApi
 
-	// Cached state, updated by polling
 	systemStatus: VVDSystemStatus | null = null
 	channelStates: Map<number, VVDChannel> = new Map()
 	activeSceneSlot: number | null = null

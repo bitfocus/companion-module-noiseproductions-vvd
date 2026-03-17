@@ -193,7 +193,7 @@ export function UpdatePresets(self: ModuleInstance): void {
 	}
 
 	// ── Channel Mode ──
-	presets['header_mode'] = { type: 'text', category, name: 'Channel Mode Status', text: '' }
+	/* presets['header_mode'] = { type: 'text', category, name: 'Channel Mode Status', text: '' }
 
 	for (const ch of CHANNEL_IDS) {
 		const name = `$(vvd:ch${ch}_name)`
@@ -222,7 +222,7 @@ export function UpdatePresets(self: ModuleInstance): void {
 				},
 			],
 		}
-	}
+	} */
 
 	// ── High Pass Filter ──
 	presets['header_hpf'] = { type: 'text', category, name: 'High Pass Filter Status', text: '' }
