@@ -3,7 +3,7 @@
 	"name": "Virtual Video Director",
 	"shortname": "VVD",
 	"description": "Control Virtual Video Director (VVD) by Noise Productions.",
-	"version": "0.1.0",
+	"version": "0.0.0",
 	"license": "MIT",
 	"repository": "git+https://github.com/bitfocus/companion-module-noiseproductions-vvd.git",
 	"bugs": "https://github.com/bitfocus/companion-module-noiseproductions-vvd/issues",
@@ -22,5 +22,5 @@
 	"legacyIds": [],
 	"manufacturer": "Noise Productions",
 	"products": ["Virtual Video Director"],
-	"keywords": ["vvd", "video", "director", "broadcast", "noise productions"]
+	"keywords": ["vvd", "video", "director", "broadcast"]
 }

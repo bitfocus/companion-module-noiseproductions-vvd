@@ -1,6 +1,6 @@
 ## Noise Productions Virtual Video Director
 
-Control Virtual Video Director (VVD) by Noise Productions.
+Control [Virtual Video Director](https://www.vvd.nz) (VVD) by Noise Productions.
 
 ## Getting Started
 
